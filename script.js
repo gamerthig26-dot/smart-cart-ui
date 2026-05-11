@@ -5,27 +5,43 @@
 const products = [
 
     {
-        barcode:"7891234567890",
-        name:"Capinha iPhone 14",
-        category:"Acessórios",
-        price:39.90,
-        image:"https://images.unsplash.com/photo-1512499617640-c74ae3a79d37"
+        barcode:"132900000001",
+        name:"Coca-Cola 1L",
+        category:"Bebidas",
+        price:8.99,
+        image:"https://images.unsplash.com/photo-1629203851122-3726ecdf080e"
     },
 
     {
-        barcode:"7899991112223",
-        name:"Película 3D",
-        category:"Acessórios",
-        price:24.90,
-        image:"https://images.unsplash.com/photo-1580910051074-3eb694886505"
+        barcode:"132900000002",
+        name:"Óleo de Soja",
+        category:"Mercado",
+        price:7.49,
+        image:"https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5"
     },
 
     {
-        barcode:"7897778889991",
-        name:"Carregador Turbo",
-        category:"Eletrônicos",
-        price:89.90,
-        image:"https://images.unsplash.com/photo-1583863788434-e58a36330cf0"
+        barcode:"132900000003",
+        name:"Pringles Original",
+        category:"Salgadinhos",
+        price:12.90,
+        image:"https://images.unsplash.com/photo-1585238342024-78d387f4a707"
+    },
+
+    {
+        barcode:"132900000004",
+        name:"Chocolate Lacta Oreo",
+        category:"Doces",
+        price:6.99,
+        image:"https://images.unsplash.com/photo-1549007994-cb92caebd54b"
+    },
+
+    {
+        barcode:"132900000005",
+        name:"Leite Integral 1L",
+        category:"Laticínios",
+        price:5.89,
+        image:"https://images.unsplash.com/photo-1550583724-b2692b85b150"
     }
 
 ];
@@ -296,7 +312,15 @@ checkoutBtn.addEventListener("click",()=>{
    SCANNER
 ========================= */
 
+let scanning = false;
+
 scanButton.addEventListener("click",()=>{
+
+    /* EVITA ABRIR MÚLTIPLAS VEZES */
+
+    if(scanning) return;
+
+    scanning = true;
 
     scannerModal.style.display =
         "flex";
@@ -317,15 +341,21 @@ scanButton.addEventListener("click",()=>{
 
         (decodedText)=>{
 
+            /* IGNORA CHECKSUM FINAL EAN-13 */
+
             const found =
             products.find(
-                p => p.barcode === decodedText
+                p => decodedText.startsWith(p.barcode)
             );
 
             if(found){
 
                 addToCart(
                     products.indexOf(found)
+                );
+
+                showNotification(
+                    `${found.name} escaneado`
                 );
 
             }else{
@@ -336,14 +366,28 @@ scanButton.addEventListener("click",()=>{
 
             }
 
-            scanner.stop();
+            /* PARA IMEDIATAMENTE */
 
-            scannerModal.style.display =
-                "none";
+            scanner.stop().then(()=>{
+
+                scannerModal.style.display =
+                    "none";
+
+                scanning = false;
+
+            });
 
         }
 
-    );
+    ).catch(()=>{
+
+        showNotification(
+            "Erro ao iniciar câmera"
+        );
+
+        scanning = false;
+
+    });
 
 });
 
@@ -355,6 +399,8 @@ closeScanner.addEventListener("click",()=>{
 
     scannerModal.style.display =
         "none";
+
+    scanning = false;
 
 });
 
