@@ -242,7 +242,10 @@ header p{
     width:70px;
     height:70px;
     border-radius:18px;
-    object-fit:cover;
+    object-fit:contain;
+    background:rgba(255,255,255,0.06);
+    padding:6px;
+    flex-shrink:0;
 }
 
 .product-price{

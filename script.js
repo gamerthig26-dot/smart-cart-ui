@@ -9,7 +9,7 @@ const products = [
         name:"Coca-Cola 1L",
         category:"Bebidas",
         price:8.99,
-        image:"https://images.unsplash.com/photo-1629203851122-3726ecdf080e"
+        image:"new-products/coca-cola.webp"
     },
 
     {
@@ -17,7 +17,7 @@ const products = [
         name:"Óleo de Soja",
         category:"Mercado",
         price:7.49,
-        image:"https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5"
+        image:"new-products/oleo-de-soja.webp"
     },
 
     {
@@ -25,7 +25,7 @@ const products = [
         name:"Pringles Original",
         category:"Salgadinhos",
         price:12.90,
-        image:"https://images.unsplash.com/photo-1585238342024-78d387f4a707"
+        image:"new-products/pringles.webp"
     },
 
     {
@@ -33,7 +33,7 @@ const products = [
         name:"Chocolate Lacta Oreo",
         category:"Doces",
         price:6.99,
-        image:"https://images.unsplash.com/photo-1549007994-cb92caebd54b"
+        image:"new-products/chocolate-lacta-oreo.webp"
     },
 
     {
@@ -41,7 +41,7 @@ const products = [
         name:"Leite Integral 1L",
         category:"Laticínios",
         price:5.89,
-        image:"https://images.unsplash.com/photo-1550583724-b2692b85b150"
+        image:"new-products/leite.webp"
     }
 
 ];
@@ -134,7 +134,12 @@ function renderProducts(){
 
                 <div class="product-left">
 
-                    <img src="${product.image}">
+                    <img
+                        src="${product.image}"
+                        alt="${product.name}"
+                        loading="lazy"
+                        decoding="async"
+                    >
 
                     <div>
 
