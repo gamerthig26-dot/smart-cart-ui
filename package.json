@@ -1,0 +1,29 @@
+{
+  "name": "smart-cart-ui",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node --check server.js && node --check routes/authRoutes.js && node --check auth/authService.js && node --check auth/token.js && node --check database/database.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gamerthig26-dot/smart-cart-ui.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/gamerthig26-dot/smart-cart-ui/issues"
+  },
+  "homepage": "https://github.com/gamerthig26-dot/smart-cart-ui#readme",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^16.4.3",
+    "express": "^5.2.1",
+    "sqlite3": "^6.0.1"
+  }
+}
