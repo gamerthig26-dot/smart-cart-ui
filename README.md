@@ -1,90 +1,47 @@
 # Smart Cart UI
 
-Smart Cart UI is an Express, SQLite, bcrypt, and vanilla frontend project with a complete authentication flow.
+Smart Cart UI is now a frontend-only static app. It keeps the original cart interface, product list, login/register screens, checkout flow, notifications, and scanner modal without routes, APIs, databases, or any server-side authentication.
 
 ## Project Structure
 
 ```text
 smart-cart-ui/
-  auth/
-    authService.js       User validation, bcrypt hashing, registration, and login checks
-    token.js             JWT creation, verification, and secure cookie helpers
-  database/
-    database.js          SQLite connection and automatic users table creation
   public/
-    index.html           Smart Cart UI, login form, register form, app header, cart, and scanner modal
-    script.js            Fetch API integration, session restore, logout, products, cart, and scanner logic
-    style.css            Responsive modern UI styles
+    index.html           Static Smart Cart UI
+    script.js            Local mock auth, products, cart, checkout, and browser scanner logic
+    style.css            Responsive UI styles and local icons
     new-products/        Product images used by the cart
-  routes/
-    authRoutes.js        POST /register, POST /login, POST /logout, and GET /user
-  .env.example           Deployment environment variable example
-  database.db            Auto-created SQLite database
-  package.json           Scripts and dependencies
-  server.js              Express app entry point
+  package.json           Project metadata only; no runtime dependencies
 ```
 
-## Start The Server
+## Run The App
 
-```bash
-npm install
-npm start
-```
-
-Then open:
+Open this file directly in a browser:
 
 ```text
-http://localhost:3000
+public/index.html
 ```
 
-On Windows PowerShell, if `npm` is blocked by execution policy, use:
+No server, API, database, install step, or external service is required.
 
-```bash
-npm.cmd start
+## Local Mock Behavior
+
+Registration and login are simulated in the browser with `localStorage`.
+
+The app stores:
+
+```text
+smart_cart_mock_users      Mock users created in this browser
+smart_cart_mock_session    Current logged-in mock user
+smart_cart_cart            Current cart product barcodes
 ```
 
-## Test The System
+Products are static mock data declared in `public/script.js`, with images loaded from `public/new-products/`.
 
-1. Open `http://localhost:3000`.
-2. Click `Cadastro`.
-3. Create a username with at least 3 characters and a password with at least 6 characters.
-4. The app logs you in automatically.
-5. Refresh the page. The session remains active because the browser has an auth cookie.
-6. Click `Sair` to log out.
-7. Try registering the same username again. The API prevents duplicates.
+## Scanner
 
-Run syntax checks:
+The scanner uses the browser-native `BarcodeDetector` and camera APIs when available. If the current browser does not support native barcode detection, the app stays functional and shows a notification that scanning is unavailable.
 
-```bash
-npm test
-```
+## Limitations
 
-## How SQLite Works Here
-
-The app creates `database.db` automatically in the project root. When `server.js` starts, it calls `initializeDatabase()` from `database/database.js`, which creates the `users` table if it does not already exist.
-
-The table stores:
-
-```sql
-id INTEGER PRIMARY KEY AUTOINCREMENT
-username TEXT NOT NULL UNIQUE
-password TEXT NOT NULL
-created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-```
-
-SQLite stores the data in one local file, so users remain saved after the server stops.
-
-## How Authentication Works
-
-Registration validates the fields, checks if the username already exists, hashes the password with bcrypt, and saves only the hash in SQLite.
-
-Login finds the user by username and uses `bcrypt.compare()` to check the submitted password against the saved hash. Plain text passwords are never stored.
-
-After login or registration, the server creates a signed JWT and sends it as an `HttpOnly` cookie. The frontend calls `GET /user` on page load; if the cookie is valid, the user stays logged in. Logout clears the cookie.
-
-Before deployment, set a strong secret:
-
-```bash
-SESSION_SECRET=your-long-random-secret
-NODE_ENV=production
-```
+Because there is no backend, mock users and carts exist only in the current browser storage. Passwords are not secure credentials; they are local demo data. There is no server-side session, database persistence, remote sync, duplicate protection across devices, or real payment processing.

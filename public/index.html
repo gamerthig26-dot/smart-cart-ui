@@ -6,8 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Cart</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 
 <body>
@@ -16,7 +14,7 @@
             <div class="auth-panel">
                 <div class="logo">
                     <div class="logo-icon">
-                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span class="ui-icon icon-cart" aria-hidden="true"></span>
                     </div>
 
                     <div>
@@ -43,7 +41,7 @@
                     <input type="password" id="loginPassword" name="password" autocomplete="current-password" placeholder="sua senha">
 
                     <button class="primary-btn" type="submit">
-                        <i class="fa-solid fa-right-to-bracket"></i>
+                        <span class="ui-icon icon-login" aria-hidden="true"></span>
                         Entrar
                     </button>
                 </form>
@@ -56,7 +54,7 @@
                     <input type="password" id="registerPassword" name="password" autocomplete="new-password" placeholder="minimo 6 caracteres">
 
                     <button class="primary-btn" type="submit">
-                        <i class="fa-solid fa-user-plus"></i>
+                        <span class="ui-icon icon-user-plus" aria-hidden="true"></span>
                         Criar conta
                     </button>
                 </form>
@@ -74,17 +72,17 @@
 
                 <div class="header-actions">
                     <div class="user-chip" id="userChip">
-                        <i class="fa-solid fa-user"></i>
+                        <span class="ui-icon icon-user" aria-hidden="true"></span>
                         <span id="loggedUser">Usuario</span>
                     </div>
 
                     <button class="scan-btn" id="scanButton" type="button">
-                        <i class="fa-solid fa-barcode"></i>
+                        <span class="ui-icon icon-barcode" aria-hidden="true"></span>
                         Escanear Produto
                     </button>
 
                     <button class="logout-btn" id="logoutBtn" type="button">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        <span class="ui-icon icon-logout" aria-hidden="true"></span>
                         Sair
                     </button>
                 </div>
@@ -124,17 +122,17 @@
 
                             <div class="payment-grid">
                                 <button class="payment-btn" type="button">
-                                    <i class="fa-solid fa-credit-card"></i>
+                                    <span class="ui-icon icon-card" aria-hidden="true"></span>
                                     Cartao
                                 </button>
 
                                 <button class="payment-btn" type="button">
-                                    <i class="fa-brands fa-pix"></i>
+                                    <span class="ui-icon icon-pix" aria-hidden="true"></span>
                                     PIX
                                 </button>
 
                                 <button class="payment-btn" type="button">
-                                    <i class="fa-solid fa-money-bill"></i>
+                                    <span class="ui-icon icon-money" aria-hidden="true"></span>
                                     Dinheiro
                                 </button>
                             </div>
@@ -154,7 +152,7 @@
             <div class="scanner-header">
                 <h2>Scanner</h2>
                 <button id="closeScanner" type="button" aria-label="Fechar scanner">
-                    <i class="fa-solid fa-xmark"></i>
+                    <span class="ui-icon icon-close" aria-hidden="true"></span>
                 </button>
             </div>
 

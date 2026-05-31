@@ -1,12 +1,9 @@
 {
   "name": "smart-cart-ui",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "description": "Static frontend-only Smart Cart demo.",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
-    "test": "node --check server.js && node --check routes/authRoutes.js && node --check auth/authService.js && node --check auth/token.js && node --check database/database.js"
+    "test": "echo \"Static frontend: open public/index.html in a browser.\""
   },
   "repository": {
     "type": "git",
@@ -19,11 +16,5 @@
   "bugs": {
     "url": "https://github.com/gamerthig26-dot/smart-cart-ui/issues"
   },
-  "homepage": "https://github.com/gamerthig26-dot/smart-cart-ui#readme",
-  "dependencies": {
-    "bcrypt": "^6.0.0",
-    "dotenv": "^16.4.3",
-    "express": "^5.2.1",
-    "sqlite3": "^6.0.1"
-  }
+  "homepage": "https://github.com/gamerthig26-dot/smart-cart-ui#readme"
 }

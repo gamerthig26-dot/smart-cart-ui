@@ -36,6 +36,12 @@ const products = [
     }
 ];
 
+const STORAGE_KEYS = {
+    users: "smart_cart_mock_users",
+    session: "smart_cart_mock_session",
+    cart: "smart_cart_cart"
+};
+
 const loginScreen = document.getElementById("loginScreen");
 const app = document.getElementById("app");
 const showLogin = document.getElementById("showLogin");
@@ -56,32 +62,115 @@ const checkoutBtn = document.getElementById("checkoutBtn");
 const scanButton = document.getElementById("scanButton");
 const scannerModal = document.getElementById("scannerModal");
 const closeScanner = document.getElementById("closeScanner");
+const reader = document.getElementById("reader");
 
 let cart = [];
-let scanner = null;
+let scannerStream = null;
+let scannerFrame = 0;
 let scanning = false;
 
-async function apiRequest(url, method = "GET", data = null) {
-    const options = {
-        method,
-        headers: {
-            "Content-Type": "application/json"
-        },
-        credentials: "same-origin"
+function readStorage(key, fallback) {
+    try {
+        const value = localStorage.getItem(key);
+        return value ? JSON.parse(value) : fallback;
+    } catch (error) {
+        return fallback;
+    }
+}
+
+function writeStorage(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+}
+
+function normalizeUsername(username) {
+    return String(username || "").trim().toLowerCase();
+}
+
+function validateCredentials(username, password) {
+    if (!String(username || "").trim() || !String(password || "").trim()) {
+        return "Preencha usuario e senha.";
+    }
+
+    if (String(username).trim().length < 3) {
+        return "Usuario deve ter pelo menos 3 caracteres.";
+    }
+
+    if (String(password).length < 6) {
+        return "Senha deve ter pelo menos 6 caracteres.";
+    }
+
+    return "";
+}
+
+function getUsers() {
+    return readStorage(STORAGE_KEYS.users, []);
+}
+
+function saveUsers(users) {
+    writeStorage(STORAGE_KEYS.users, users);
+}
+
+function findUser(username) {
+    return getUsers().find((user) => user.username === normalizeUsername(username));
+}
+
+function createSession(user) {
+    const sessionUser = {
+        id: user.id,
+        username: user.username
     };
 
-    if (data) {
-        options.body = JSON.stringify(data);
+    writeStorage(STORAGE_KEYS.session, sessionUser);
+    return sessionUser;
+}
+
+function getCurrentUser() {
+    return readStorage(STORAGE_KEYS.session, null);
+}
+
+function clearSession() {
+    localStorage.removeItem(STORAGE_KEYS.session);
+}
+
+function registerLocalUser(username, password) {
+    const validationError = validateCredentials(username, password);
+
+    if (validationError) {
+        throw new Error(validationError);
     }
 
-    const response = await fetch(url, options);
-    const result = await response.json();
+    const users = getUsers();
+    const normalizedUsername = normalizeUsername(username);
 
-    if (!response.ok) {
-        throw new Error(result.message || "Request failed.");
+    if (users.some((user) => user.username === normalizedUsername)) {
+        throw new Error("Este usuario ja esta cadastrado.");
     }
 
-    return result;
+    const user = {
+        id: Date.now(),
+        username: normalizedUsername,
+        password,
+        createdAt: new Date().toISOString()
+    };
+
+    users.push(user);
+    saveUsers(users);
+
+    return createSession(user);
+}
+
+function loginLocalUser(username, password) {
+    if (!String(username || "").trim() || !String(password || "").trim()) {
+        throw new Error("Preencha usuario e senha.");
+    }
+
+    const user = findUser(username);
+
+    if (!user || user.password !== password) {
+        throw new Error("Usuario ou senha invalidos.");
+    }
+
+    return createSession(user);
 }
 
 function setAuthMessage(message, type = "info") {
@@ -105,6 +194,8 @@ function showApp(user) {
     app.classList.remove("hidden");
     welcomeText.textContent = `Bem-vindo, ${user.username}`;
     loggedUser.textContent = user.username;
+    cart = loadCart();
+    renderCart();
 }
 
 function showAuth() {
@@ -114,71 +205,61 @@ function showAuth() {
     welcomeText.textContent = "Bem-vindo";
 }
 
-async function checkCurrentUser() {
-    try {
-        const result = await apiRequest("/user");
-        showApp(result.user);
-    } catch (error) {
-        showAuth();
+function checkCurrentUser() {
+    const user = getCurrentUser();
+
+    if (user) {
+        showApp(user);
+        return;
     }
+
+    showAuth();
 }
 
 showLogin.addEventListener("click", () => switchAuthMode("login"));
 showRegister.addEventListener("click", () => switchAuthMode("register"));
 
-loginForm.addEventListener("submit", async (event) => {
+loginForm.addEventListener("submit", (event) => {
     event.preventDefault();
 
     const username = loginForm.username.value.trim();
     const password = loginForm.password.value;
 
-    if (!username || !password) {
-        setAuthMessage("Preencha usuario e senha.", "error");
-        return;
-    }
-
     try {
         setAuthMessage("Entrando...", "info");
-        const result = await apiRequest("/login", "POST", { username, password });
+        const user = loginLocalUser(username, password);
         loginForm.reset();
-        showApp(result.user);
+        showApp(user);
         showNotification("Login realizado com sucesso");
     } catch (error) {
         setAuthMessage(error.message, "error");
     }
 });
 
-registerForm.addEventListener("submit", async (event) => {
+registerForm.addEventListener("submit", (event) => {
     event.preventDefault();
 
     const username = registerForm.username.value.trim();
     const password = registerForm.password.value;
 
-    if (!username || !password) {
-        setAuthMessage("Preencha usuario e senha.", "error");
-        return;
-    }
-
     try {
         setAuthMessage("Criando conta...", "info");
-        const result = await apiRequest("/register", "POST", { username, password });
+        const user = registerLocalUser(username, password);
         registerForm.reset();
-        showApp(result.user);
+        showApp(user);
         showNotification("Conta criada com sucesso");
     } catch (error) {
         setAuthMessage(error.message, "error");
     }
 });
 
-logoutBtn.addEventListener("click", async () => {
-    try {
-        await apiRequest("/logout", "POST");
-    } finally {
-        cart = [];
-        renderCart();
-        showAuth();
-        showNotification("Sessao encerrada");
-    }
+logoutBtn.addEventListener("click", () => {
+    clearSession();
+    cart = [];
+    saveCart();
+    renderCart();
+    showAuth();
+    showNotification("Sessao encerrada");
 });
 
 function formatCurrency(value) {
@@ -186,6 +267,18 @@ function formatCurrency(value) {
         style: "currency",
         currency: "BRL"
     });
+}
+
+function loadCart() {
+    const savedCart = readStorage(STORAGE_KEYS.cart, []);
+
+    return savedCart
+        .map((barcode) => products.find((product) => product.barcode === barcode))
+        .filter(Boolean);
+}
+
+function saveCart() {
+    writeStorage(STORAGE_KEYS.cart, cart.map((item) => item.barcode));
 }
 
 function renderProducts() {
@@ -217,6 +310,7 @@ function addToCart(index) {
     const product = products[index];
 
     cart.push(product);
+    saveCart();
     renderCart();
     showNotification(`${product.name} adicionado`);
 }
@@ -243,7 +337,7 @@ function renderCart() {
                 <div class="cart-item-actions">
                     <strong>${formatCurrency(item.price)}</strong>
                     <button onclick="removeItem(${index})" class="icon-btn danger" type="button" aria-label="Remover ${item.name}">
-                        <i class="fa-solid fa-xmark"></i>
+                        <span class="ui-icon icon-close" aria-hidden="true"></span>
                     </button>
                 </div>
             </div>
@@ -258,12 +352,14 @@ function removeItem(index) {
     const removed = cart[index];
 
     cart.splice(index, 1);
+    saveCart();
     renderCart();
     showNotification(`${removed.name} removido`);
 }
 
 clearCart.addEventListener("click", () => {
     cart = [];
+    saveCart();
     renderCart();
     showNotification("Carrinho limpo");
 });
@@ -276,55 +372,86 @@ checkoutBtn.addEventListener("click", () => {
 
     showNotification("Compra finalizada");
     cart = [];
+    saveCart();
     renderCart();
 });
 
-scanButton.addEventListener("click", () => {
+scanButton.addEventListener("click", async () => {
     if (scanning) {
         return;
     }
 
-    if (!window.Html5Qrcode) {
-        showNotification("Biblioteca do scanner nao carregada");
+    if (!("BarcodeDetector" in window) || !navigator.mediaDevices?.getUserMedia) {
+        showNotification("Scanner indisponivel neste navegador");
         return;
     }
 
     scanning = true;
     scannerModal.style.display = "flex";
-    scanner = new Html5Qrcode("reader");
+    reader.textContent = "Abrindo camera...";
 
-    scanner.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: 250 },
-        (decodedText) => {
-            const found = products.find((product) => decodedText.startsWith(product.barcode));
+    try {
+        scannerStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: "environment"
+            },
+            audio: false
+        });
 
-            if (found) {
-                addToCart(products.indexOf(found));
-                showNotification(`${found.name} escaneado`);
-            } else {
-                showNotification("Produto nao encontrado");
-            }
+        const video = document.createElement("video");
+        const detector = new BarcodeDetector({
+            formats: ["ean_13", "ean_8", "code_128", "qr_code"]
+        });
 
-            stopScanner();
-        }
-    ).catch(() => {
+        video.setAttribute("playsinline", "true");
+        video.muted = true;
+        video.srcObject = scannerStream;
+        reader.replaceChildren(video);
+        await video.play();
+        scanVideoFrame(video, detector);
+    } catch (error) {
         showNotification("Erro ao iniciar camera");
-        scanning = false;
-    });
+        stopScanner();
+    }
 });
 
-function stopScanner() {
-    if (scanner) {
-        scanner.stop().catch(() => null).finally(() => {
-            scanner.clear();
-            scanner = null;
-            scannerModal.style.display = "none";
-            scanning = false;
-        });
+async function scanVideoFrame(video, detector) {
+    if (!scanning) {
         return;
     }
 
+    try {
+        const barcodes = await detector.detect(video);
+        const code = barcodes[0]?.rawValue || "";
+        const found = products.find((product) => code.startsWith(product.barcode));
+
+        if (found) {
+            addToCart(products.indexOf(found));
+            showNotification(`${found.name} escaneado`);
+            stopScanner();
+            return;
+        }
+    } catch (error) {
+        showNotification("Nao foi possivel ler o codigo");
+        stopScanner();
+        return;
+    }
+
+    scannerFrame = requestAnimationFrame(() => scanVideoFrame(video, detector));
+}
+
+function stopScanner() {
+    if (scannerFrame) {
+        cancelAnimationFrame(scannerFrame);
+        scannerFrame = 0;
+    }
+
+    if (scannerStream) {
+        scannerStream.getTracks().forEach((track) => track.stop());
+        scannerStream = null;
+    }
+
+    reader.textContent = "";
     scannerModal.style.display = "none";
     scanning = false;
 }
