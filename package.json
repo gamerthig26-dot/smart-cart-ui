@@ -1,0 +1,20 @@
+{
+  "name": "smart-cart-ui",
+  "version": "1.0.0",
+  "description": "Static frontend-only Smart Cart demo.",
+  "scripts": {
+    "test": "echo \"Static frontend: open public/index.html in a browser.\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gamerthig26-dot/smart-cart-ui.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/gamerthig26-dot/smart-cart-ui/issues"
+  },
+  "homepage": "https://github.com/gamerthig26-dot/smart-cart-ui#readme"
+}
