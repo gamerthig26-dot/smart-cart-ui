@@ -53,6 +53,7 @@ const registerForm = document.getElementById("registerForm");
 const welcomeText = document.getElementById("welcomeText");
 const loggedUser = document.getElementById("loggedUser");
 const logoutBtn = document.getElementById("logoutBtn");
+const productSearch = document.getElementById("productSearch");
 const productsList = document.getElementById("productsList");
 const cartItems = document.getElementById("cartItems");
 const subtotal = document.getElementById("subtotal");
@@ -281,10 +282,28 @@ function saveCart() {
     writeStorage(STORAGE_KEYS.cart, cart.map((item) => item.barcode));
 }
 
+function getFilteredProducts() {
+    const searchTerm = productSearch.value.trim().toLowerCase();
+
+    if (!searchTerm) {
+        return products;
+    }
+
+    return products.filter((product) => product.name.toLowerCase().includes(searchTerm));
+}
+
 function renderProducts() {
     productsList.innerHTML = "";
+    const filteredProducts = getFilteredProducts();
 
-    products.forEach((product, index) => {
+    if (filteredProducts.length === 0) {
+        productsList.innerHTML = "<div class=\"empty-products\">No products found</div>";
+        return;
+    }
+
+    filteredProducts.forEach((product) => {
+        const index = products.indexOf(product);
+
         productsList.innerHTML += `
             <div class="product-card">
                 <div class="product-left">
@@ -305,6 +324,8 @@ function renderProducts() {
         `;
     });
 }
+
+productSearch.addEventListener("input", renderProducts);
 
 function addToCart(index) {
     const product = products[index];
