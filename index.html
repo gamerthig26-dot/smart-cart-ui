@@ -2,260 +2,165 @@
 <html lang="pt-BR">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Cart</title>
-
-    <!-- CSS -->
     <link rel="stylesheet" href="style.css">
-
-    <!-- ICONS -->
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    >
-
-    <!-- SCANNER -->
-    <script src="https://unpkg.com/html5-qrcode"></script>
-
 </head>
 
 <body>
+    <div class="page-shell">
+        <section class="auth-screen" id="loginScreen">
+            <div class="auth-panel">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <span class="ui-icon icon-cart" aria-hidden="true"></span>
+                    </div>
 
-    <!-- BACKGROUND -->
-    <div class="bg-gradient"></div>
-
-    <!-- LOGIN -->
-    <div class="login-screen" id="loginScreen">
-
-        <div class="login-box">
-
-            <div class="logo">
-
-                <div class="logo-icon">
-                    <i class="fa-solid fa-cart-shopping"></i>
+                    <div>
+                        <h1>Smart Cart</h1>
+                        <span>Mercado Inteligente</span>
+                    </div>
                 </div>
 
-                <div>
-
-                    <h1>Smart Cart</h1>
-                    <span>Mercado Inteligente</span>
-
+                <div class="auth-copy">
+                    <h2 id="authTitle">Entrar na conta</h2>
+                    <p>Use sua conta para acessar o carrinho inteligente.</p>
                 </div>
 
-            </div>
-
-            <h2>
-                Entrar no Carrinho
-            </h2>
-
-            <input
-                type="text"
-                id="userName"
-                placeholder="Digite seu nome"
-            >
-
-            <input
-                type="text"
-                id="userCPF"
-                placeholder="CPF / Matrícula"
-            >
-
-            <button id="loginBtn">
-                Entrar
-            </button>
-
-        </div>
-
-    </div>
-
-    <!-- APP -->
-    <main
-        class="app hidden"
-        id="app"
-    >
-
-        <!-- HEADER -->
-        <header>
-
-            <div>
-
-                <h1>
-                    Carrinho Inteligente
-                </h1>
-
-                <p id="welcomeText">
-                    Bem-vindo
-                </p>
-
-            </div>
-
-            <button
-                class="scan-btn"
-                id="scanButton"
-            >
-
-                <i class="fa-solid fa-barcode"></i>
-
-                Escanear Produto
-
-            </button>
-
-        </header>
-
-        <!-- CONTEÚDO -->
-        <section class="content-grid">
-
-            <!-- PRODUTOS -->
-            <div class="products-panel glass">
-
-                <div class="panel-header">
-
-                    <h2>
-                        Produtos
-                    </h2>
-
-                    <span class="live-badge">
-                        ONLINE
-                    </span>
-
+                <div class="auth-tabs" role="tablist" aria-label="Autenticacao">
+                    <button class="auth-tab active" id="showLogin" type="button">Login</button>
+                    <button class="auth-tab" id="showRegister" type="button">Cadastro</button>
                 </div>
 
-                <div
-                    class="products-list"
-                    id="productsList"
-                >
+                <form class="auth-form" id="loginForm">
+                    <label for="loginUsername">Usuario</label>
+                    <input type="text" id="loginUsername" name="username" autocomplete="username" placeholder="seu usuario">
 
-                </div>
+                    <label for="loginPassword">Senha</label>
+                    <input type="password" id="loginPassword" name="password" autocomplete="current-password" placeholder="sua senha">
 
-            </div>
-
-            <!-- CARRINHO -->
-            <div class="cart-panel glass">
-
-                <div class="panel-header">
-
-                    <h2>
-                        Carrinho
-                    </h2>
-
-                    <button
-                        class="clear-btn"
-                        id="clearCart"
-                    >
-                        Limpar
+                    <button class="primary-btn" type="submit">
+                        <span class="ui-icon icon-login" aria-hidden="true"></span>
+                        Entrar
                     </button>
+                </form>
 
-                </div>
+                <form class="auth-form hidden" id="registerForm">
+                    <label for="registerUsername">Novo usuario</label>
+                    <input type="text" id="registerUsername" name="username" autocomplete="username" placeholder="minimo 3 caracteres">
 
-                <div
-                    class="cart-items"
-                    id="cartItems"
-                >
+                    <label for="registerPassword">Nova senha</label>
+                    <input type="password" id="registerPassword" name="password" autocomplete="new-password" placeholder="minimo 6 caracteres">
 
-                </div>
-
-                <!-- FOOTER -->
-                <div class="cart-footer">
-
-                    <div class="total-row">
-
-                        <span>Subtotal</span>
-
-                        <strong id="subtotal">
-                            R$ 0,00
-                        </strong>
-
-                    </div>
-
-                    <div class="total-row final">
-
-                        <span>Total</span>
-
-                        <strong id="total">
-                            R$ 0,00
-                        </strong>
-
-                    </div>
-
-                    <!-- PAGAMENTO -->
-                    <div class="payment-section">
-
-                        <h3>
-                            Forma de Pagamento
-                        </h3>
-
-                        <div class="payment-grid">
-
-                            <button class="payment-btn">
-                                <i class="fa-solid fa-credit-card"></i>
-                                Cartão
-                            </button>
-
-                            <button class="payment-btn">
-                                <i class="fa-brands fa-pix"></i>
-                                PIX
-                            </button>
-
-                            <button class="payment-btn">
-                                <i class="fa-solid fa-money-bill"></i>
-                                Dinheiro
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                    <button
-                        class="checkout-btn"
-                        id="checkoutBtn"
-                    >
-                        Finalizar Compra
+                    <button class="primary-btn" type="submit">
+                        <span class="ui-icon icon-user-plus" aria-hidden="true"></span>
+                        Criar conta
                     </button>
+                </form>
 
-                </div>
-
+                <div class="auth-message" id="authMessage" role="status" aria-live="polite"></div>
             </div>
-
         </section>
 
-    </main>
+        <main class="app hidden" id="app">
+            <header class="app-header">
+                <div>
+                    <h1>Carrinho Inteligente</h1>
+                    <p id="welcomeText">Bem-vindo</p>
+                </div>
 
-    <!-- MODAL SCANNER -->
-    <div
-        class="scanner-modal"
-        id="scannerModal"
-    >
+                <div class="header-actions">
+                    <div class="user-chip" id="userChip">
+                        <span class="ui-icon icon-user" aria-hidden="true"></span>
+                        <span id="loggedUser">Usuario</span>
+                    </div>
 
+                    <button class="scan-btn" id="scanButton" type="button">
+                        <span class="ui-icon icon-barcode" aria-hidden="true"></span>
+                        Escanear Produto
+                    </button>
+
+                    <button class="logout-btn" id="logoutBtn" type="button">
+                        <span class="ui-icon icon-logout" aria-hidden="true"></span>
+                        Sair
+                    </button>
+                </div>
+            </header>
+
+            <section class="content-grid">
+                <div class="products-panel glass">
+                    <div class="panel-header">
+                        <h2>Produtos</h2>
+                        <span class="live-badge">ONLINE</span>
+                    </div>
+
+                    <div class="products-list" id="productsList"></div>
+                </div>
+
+                <div class="cart-panel glass">
+                    <div class="panel-header">
+                        <h2>Carrinho</h2>
+                        <button class="clear-btn" id="clearCart" type="button">Limpar</button>
+                    </div>
+
+                    <div class="cart-items" id="cartItems"></div>
+
+                    <div class="cart-footer">
+                        <div class="total-row">
+                            <span>Subtotal</span>
+                            <strong id="subtotal">R$ 0,00</strong>
+                        </div>
+
+                        <div class="total-row final">
+                            <span>Total</span>
+                            <strong id="total">R$ 0,00</strong>
+                        </div>
+
+                        <div class="payment-section">
+                            <h3>Forma de Pagamento</h3>
+
+                            <div class="payment-grid">
+                                <button class="payment-btn" type="button">
+                                    <span class="ui-icon icon-card" aria-hidden="true"></span>
+                                    Cartao
+                                </button>
+
+                                <button class="payment-btn" type="button">
+                                    <span class="ui-icon icon-pix" aria-hidden="true"></span>
+                                    PIX
+                                </button>
+
+                                <button class="payment-btn" type="button">
+                                    <span class="ui-icon icon-money" aria-hidden="true"></span>
+                                    Dinheiro
+                                </button>
+                            </div>
+                        </div>
+
+                        <button class="checkout-btn" id="checkoutBtn" type="button">
+                            Finalizar Compra
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="scanner-modal" id="scannerModal">
         <div class="scanner-box">
-
             <div class="scanner-header">
-
-                <h2>
-                    Scanner
-                </h2>
-
-                <button id="closeScanner">
-                    X
+                <h2>Scanner</h2>
+                <button id="closeScanner" type="button" aria-label="Fechar scanner">
+                    <span class="ui-icon icon-close" aria-hidden="true"></span>
                 </button>
-
             </div>
 
             <div id="reader"></div>
-
         </div>
-
     </div>
 
-    <!-- JS -->
     <script src="script.js"></script>
-
 </body>
 
 </html>
