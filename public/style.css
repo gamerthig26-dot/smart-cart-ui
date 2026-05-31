@@ -709,6 +709,10 @@ header p,
     display: block;
 }
 
+#reader video.front-camera-preview {
+    transform: scaleX(-1);
+}
+
 .notification {
     position: fixed;
     top: 24px;

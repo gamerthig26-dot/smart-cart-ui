@@ -481,6 +481,7 @@ async function startCamera(facingMode, allowFallback = false) {
 
     video.setAttribute("playsinline", "true");
     video.muted = true;
+    video.classList.toggle("front-camera-preview", currentFacingMode === "user");
     video.srcObject = scannerStream;
     reader.replaceChildren(video);
     await video.play();
