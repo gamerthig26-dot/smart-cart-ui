@@ -63,12 +63,16 @@ const checkoutBtn = document.getElementById("checkoutBtn");
 const scanButton = document.getElementById("scanButton");
 const scannerModal = document.getElementById("scannerModal");
 const closeScanner = document.getElementById("closeScanner");
+const switchCamera = document.getElementById("switchCamera");
+const cameraStatus = document.getElementById("cameraStatus");
 const reader = document.getElementById("reader");
 
 let cart = [];
 let scannerStream = null;
 let scannerFrame = 0;
 let scanning = false;
+let currentFacingMode = "user";
+let availableCameraCount = 0;
 
 function readStorage(key, fallback) {
     try {
@@ -397,42 +401,151 @@ checkoutBtn.addEventListener("click", () => {
     renderCart();
 });
 
+function scannerIsSupported() {
+    return "BarcodeDetector" in window && Boolean(navigator.mediaDevices?.getUserMedia);
+}
+
+function getCameraLabel() {
+    return currentFacingMode === "user" ? "Camera frontal" : "Camera traseira";
+}
+
+function updateCameraControls() {
+    cameraStatus.textContent = getCameraLabel();
+    switchCamera.hidden = availableCameraCount <= 1;
+    switchCamera.disabled = availableCameraCount <= 1;
+}
+
+async function updateAvailableCameras() {
+    if (!navigator.mediaDevices?.enumerateDevices) {
+        availableCameraCount = 0;
+        updateCameraControls();
+        return;
+    }
+
+    try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        availableCameraCount = devices.filter((device) => device.kind === "videoinput").length;
+    } catch (error) {
+        availableCameraCount = 0;
+    }
+
+    updateCameraControls();
+}
+
+function stopCameraStream() {
+    if (scannerFrame) {
+        cancelAnimationFrame(scannerFrame);
+        scannerFrame = 0;
+    }
+
+    if (scannerStream) {
+        scannerStream.getTracks().forEach((track) => track.stop());
+        scannerStream = null;
+    }
+}
+
+async function getCameraStream(facingMode, allowFallback = false) {
+    try {
+        return await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode
+            },
+            audio: false
+        });
+    } catch (error) {
+        if (!allowFallback) {
+            throw error;
+        }
+
+        return navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false
+        });
+    }
+}
+
+async function startCamera(facingMode, allowFallback = false) {
+    stopCameraStream();
+    currentFacingMode = facingMode;
+    updateCameraControls();
+    reader.textContent = `Abrindo ${getCameraLabel().toLowerCase()}...`;
+
+    scannerStream = await getCameraStream(facingMode, allowFallback);
+
+    await updateAvailableCameras();
+
+    const video = document.createElement("video");
+    const detector = new BarcodeDetector({
+        formats: ["ean_13", "ean_8", "code_128", "qr_code"]
+    });
+
+    video.setAttribute("playsinline", "true");
+    video.muted = true;
+    video.srcObject = scannerStream;
+    reader.replaceChildren(video);
+    await video.play();
+    scanVideoFrame(video, detector);
+}
+
+function getCameraErrorMessage(error) {
+    if (error?.name === "NotAllowedError" || error?.name === "SecurityError") {
+        return "Permissao da camera negada";
+    }
+
+    if (error?.name === "NotFoundError" || error?.name === "DevicesNotFoundError") {
+        return "Nenhuma camera encontrada";
+    }
+
+    return "Erro ao iniciar camera";
+}
+
 scanButton.addEventListener("click", async () => {
     if (scanning) {
         return;
     }
 
-    if (!("BarcodeDetector" in window) || !navigator.mediaDevices?.getUserMedia) {
+    if (!scannerIsSupported()) {
         showNotification("Scanner indisponivel neste navegador");
         return;
     }
 
     scanning = true;
+    currentFacingMode = "user";
     scannerModal.style.display = "flex";
-    reader.textContent = "Abrindo camera...";
+    updateCameraControls();
 
     try {
-        scannerStream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: "environment"
-            },
-            audio: false
-        });
-
-        const video = document.createElement("video");
-        const detector = new BarcodeDetector({
-            formats: ["ean_13", "ean_8", "code_128", "qr_code"]
-        });
-
-        video.setAttribute("playsinline", "true");
-        video.muted = true;
-        video.srcObject = scannerStream;
-        reader.replaceChildren(video);
-        await video.play();
-        scanVideoFrame(video, detector);
+        await startCamera(currentFacingMode, true);
     } catch (error) {
-        showNotification("Erro ao iniciar camera");
+        showNotification(getCameraErrorMessage(error));
         stopScanner();
+    }
+});
+
+switchCamera.addEventListener("click", async () => {
+    if (!scanning || switchCamera.disabled) {
+        return;
+    }
+
+    const previousFacingMode = currentFacingMode;
+    const nextFacingMode = currentFacingMode === "user" ? "environment" : "user";
+
+    switchCamera.disabled = true;
+
+    try {
+        await startCamera(nextFacingMode);
+        showNotification(`${getCameraLabel()} ativada`);
+    } catch (error) {
+        showNotification(`${getCameraErrorMessage(error)}. Mantendo camera anterior`);
+
+        try {
+            await startCamera(previousFacingMode, true);
+        } catch (restoreError) {
+            showNotification(getCameraErrorMessage(restoreError));
+            stopScanner();
+        }
+    } finally {
+        switchCamera.disabled = availableCameraCount <= 1;
     }
 });
 
@@ -462,19 +575,12 @@ async function scanVideoFrame(video, detector) {
 }
 
 function stopScanner() {
-    if (scannerFrame) {
-        cancelAnimationFrame(scannerFrame);
-        scannerFrame = 0;
-    }
-
-    if (scannerStream) {
-        scannerStream.getTracks().forEach((track) => track.stop());
-        scannerStream = null;
-    }
-
+    stopCameraStream();
     reader.textContent = "";
     scannerModal.style.display = "none";
     scanning = false;
+    currentFacingMode = "user";
+    updateCameraControls();
 }
 
 closeScanner.addEventListener("click", stopScanner);

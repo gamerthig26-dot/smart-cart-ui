@@ -661,6 +661,36 @@ header p,
     cursor: pointer;
 }
 
+.scanner-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.scanner-actions span {
+    color: var(--muted);
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+.scanner-actions button {
+    min-height: 40px;
+    border-radius: 8px;
+    background: rgba(56, 189, 248, 0.9);
+    color: white;
+    cursor: pointer;
+    font-weight: 800;
+    padding: 0 14px;
+}
+
+.scanner-actions button:disabled {
+    cursor: not-allowed;
+    filter: grayscale(0.45);
+    opacity: 0.62;
+}
+
 #reader {
     width: 100%;
     min-height: 280px;
@@ -773,5 +803,14 @@ header p,
 
     .payment-grid {
         grid-template-columns: 1fr;
+    }
+
+    .scanner-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .scanner-actions button {
+        width: 100%;
     }
 }
